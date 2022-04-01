@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login2Xplore's JsonPowerDB</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="http://login2explore.com/jpdb/resources/js/0.0.3/jpdb-commons.js"></script>
+
+        <style type="text/css">
+		
+        body
+   	 {
+		background-color:#D3D3D3;
+  		font-family:verdana;
+                color: #000;
+		font-size: 24px;
+            
+            text-align: center;
+	}
+	</style>
+    </head>
+    
+     <body>
+    <center><h1>View all students in Department</h1></center>
+    <center>
+        <select id="dept" name="dept" >
+	<option>Select..</option>
+        <option value="CS">Computer Science</option>
+        <option value="IT">Information Technology</option>
+        <option value="EXTC">Electronics and Communication</option>
+        <option value="MECH">Mechanical</option>
+        <option value="CVL">Civil</option>
+        </select>
+        <input type="button" value="View Records" onclick="deptData();"/></center>
+    
+    <p id="show"> </p>
+    
+    <script>
+        function executeCommand(reqString, dbBaseUrl, apiEndPointUrl) {
+            var url = dbBaseUrl + apiEndPointUrl;
+            var jsonObj;
+            $.post(url, reqString, function (result) {
+                jsonObj = JSON.parse(result);
+            }).fail(function (result) {
+                var dataJsonObj = result.responseText;
+                jsonObj = JSON.parse(dataJsonObj);
+            });
+            return jsonObj;
+        }
+        
+        
+function createFIND_ALL_RECORDSRequest(token, dbName, relName, jsonObjStr, createTime, updateTime) {
+    if (createTime !== undefined) {
+        if (createTime !== true) {
+            createTime = false;
+        }
+    } else {
+        createTime = false;
+    }
+    if (updateTime !== undefined) {
+        if (updateTime !== true) {
+            updateTime = false;
+        }
+    } else {
+        updateTime = false;
+    }
+    var req = "{\n"
+            + "\"token\" : \""
+            + token
+            + "\","
+            + "\"dbName\": \""
+            + dbName
+            + "\",\n" + "\"cmd\" : \"FIND_ALL_RECORDS\",\n"
+            + "\"rel\" : \""
+            + relName
+            + "\",\n"
+            + "\"jsonStr\":\n"
+            + jsonObjStr
+            + "\,"
+            + "\"createTime\":"
+            + createTime
+            + "\,"
+            + "\"updateTime\":"
+            + updateTime
+            + "\n"
+            + "}";
+    return req;
+}
+        
+        function deptData(){
+            var token = "90935330|-31948798561083333|90934481";
+            var dbName = "PROJECT";
+            var relName = "STD-DATA";
+            var dept = document.getElementById("dept").value;
+            var jsonStrObj = {
+                Department: dept,
+                
+            };
+            var trueval = true;           
+            var reqString = createFIND_ALL_RECORDSRequest(token, dbName, relName, JSON.stringify(jsonStrObj), trueval, trueval);
+            
+            alert(reqString);
+            
+            jQuery.ajaxSetup({async: false});
+            var resultObj = executeCommand(reqString,
+                    "http://api.login2explore.com:5577", "/api/irl");
+            jQuery.ajaxSetup({async: true});
+            
+            var data = JSON.stringify(resultObj);
+            var res = data.split("rec_no");
+            var mainContainer = document.getElementById("show");
+            mainContainer.innerHTML =  res;
+        }
+    </script>
+    
+  
+    </body>
+</html>
